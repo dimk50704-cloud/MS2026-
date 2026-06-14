@@ -211,7 +211,20 @@ function calc(){
   addSource('怪物公園', (PARK[bucket]||0)*parkEffectiveRuns*totalWeeks*sharedParkBonus);
   addSource('紅月之森', (PAGE1[workLevel]?PAGE1[workLevel].redMoon:0)*num(q('redMoonWeeks').value)*num(q('redMoonMode').value));
   addSource('極限怪物公園', (PAGE1[workLevel]?PAGE1[workLevel].extremePark:0)*num(q('extParkWeeks').value)*sharedParkBonus);
-  addSource('史詩副本', (num(q('ep260').value)*(EPIC['260'][workLevel]||0)+num(q('ep270').value)*(EPIC['270'][workLevel]||0)+num(q('ep280').value)*(EPIC['280'][workLevel]||0))*((q('epRate').value==='custom')?num(q('epCustom').value):num(q('epRate').value)));
+ addSource(
+  '史詩副本',
+  (
+    num(q('ep260').value) * (EPIC['260'][workLevel] || 0) +
+    num(q('ep270').value) * (EPIC['270'][workLevel] || 0) +
+    num(q('ep280').value) * (EPIC['280'][workLevel] || 0)
+  )
+  * (
+    (q('epRate').value === 'custom')
+      ? num(q('epCustom').value)
+      : Number(q('epRate').value)
+  )
+  * 1.3441
+);
 
   let total=rows.reduce((a,b)=>a+b.exp,0); if(!isFinite(total)) total=0;
   const out=progressAfter(workLevel,workPct,extraForProgress,q('mode').value);
