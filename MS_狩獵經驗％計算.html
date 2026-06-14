@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MS 狩獵經驗％計算</title>
+<style>
+:root{--bg:#0f172a;--card:#111827;--muted:#94a3b8;--text:#e5e7eb;--line:#243041;--accent:#38bdf8}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#0b1220,#0f172a);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans TC",sans-serif}.wrap{max-width:1500px;margin:0 auto;padding:24px}h1{margin:0 0 8px;font-size:28px}h2{font-size:18px;margin:0 0 12px}.sub{color:var(--muted);line-height:1.6;margin-bottom:18px}.nav{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}.nav a{color:#bae6fd;text-decoration:none;background:#082f49;padding:8px 12px;border-radius:999px;border:1px solid #164e63}.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;align-items:start}.stack{display:grid;gap:14px}.card{background:rgba(17,24,39,.96);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 10px 35px rgba(0,0,0,.22)}label{display:block;font-size:13px;color:#cbd5e1;margin-bottom:6px}input,select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #334155;background:#0b1220;color:var(--text)}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.kpi{background:#0b1220;border:1px solid #243041;border-radius:10px;padding:8px 10px}.kpi .t{font-size:11px;color:#94a3b8;margin-bottom:4px}.kpi .v{font-size:18px;font-weight:700}.muted{color:var(--muted);font-size:12px;line-height:1.5}.section-gap{margin-top:12px;padding-top:12px;border-top:1px dashed #334155}table{width:100%;border-collapse:collapse}th,td{text-align:right;padding:8px 6px;border-bottom:1px solid #243041;font-size:13px}th:first-child,td:first-child{text-align:left}@media(max-width:1100px){.grid{grid-template-columns:1fr}}@media(max-width:760px){.row,.row3,.kpis{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="nav"><a href="./index.html">主計算頁</a><a href="./MS_狩獵經驗％計算.html">狩獵經驗%</a><a href="./MS_狩獵效率.html">狩獵效率</a><a href="./MS_活動資源等值高階EXP.html">活動資源</a><a href="./MS_VIP掛機推估.html">VIP掛機</a></div>
+<h1>MS 狩獵經驗％計算</h1>
+<div class="sub">專門計算狩獵經驗加成與實際倍率。</div>
+<div class="grid">
+  <div class="stack">
+    <div class="card">
+      <h2>核心狩獵倍率</h2>
+      <div class="row3">
+        <div><label>基礎</label><input id="base" value="100" readonly></div>
+        <div><label>地圖燒</label><select id="map"><option value="100">100%</option><option value="95">95%</option><option value="custom">自填</option></select></div>
+        <div><label>地圖燒自填 %</label><input id="mapCustom" type="number" value="100"></div>
+      </div>
+      <div class="row3 section-gap">
+        <div><label>藍捲</label><select id="blue"><option value="100">2倍卷</option><option value="200" selected>3倍卷</option><option value="300">4倍卷</option></select></div>
+        <div><label>黃水</label><input id="yellow" type="number" value="10"></div>
+        <div><label>天氣</label><select id="weather"><option value="50">50%</option><option value="75">75%</option><option value="100">100%</option></select></div>
+      </div>
+      <div class="row3 section-gap">
+        <div><label>苦行（使用時預設常駐）</label><select id="hard"><option value="0" selected>0%</option><option value="15">啟用</option></select></div>
+        <div><label>經驗寵物</label><select id="pet"><option value="0" selected>0%</option><option value="5">5%</option><option value="20">20%</option></select></div>
+        <div><label>經驗秘藥</label><select id="potion"><option value="10">10%</option><option value="20">20%</option></select></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>技能 / 常駐</h2>
+      <div class="row3">
+        <div><label>祈禱</label><select id="pray"><option value="0">不使用</option><option value="35">實用祈禱滿等</option><option value="70">主教祈禱</option></select></div>
+        <div><label>骰子6</label><select id="dice"><option value="0" selected>0%</option><option value="30">30%</option></select></div>
+        <div><label>其餘職業技能經驗提升</label><input id="otherSkill" type="number" value="0"></div>
+      </div>
+      <div class="row3 section-gap">
+        <div><label>精靈傳授+神子角色卡+戰地</label><input id="union" type="number" value="35"></div>
+        <div><label>精靈鍊</label><select id="chain"><option value="0">0%</option><option value="30">30%</option></select></div>
+        <div><label>極限自填（上限10%）</label><input id="limitBuff" type="number" value="0" max="10"></div>
+      </div>
+      <div class="row3 section-gap">
+        <div><label>挑戰者伺服器</label><select id="challenger"><option value="0" selected>否</option><option value="50">是</option></select></div>
+        <div><label>茁壯幼苗</label><select id="seed"><option value="0">0%</option><option value="10">10%</option></select></div>
+        <div><label>活動經驗自填</label><input id="eventBuff" type="number" value="0"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>雙面神</h2>
+      <div class="row">
+        <div><label>雙面神等級</label><input id="godLv" type="number" min="0" max="30" value="0"></div>
+        <div><label>雙面神經驗加成</label><input id="godOut" value="0%" readonly></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <h2>結果</h2>
+      <div class="kpis">
+        <div class="kpi"><div class="t">實際狩獵倍率</div><div class="v" id="realRate">1.00 倍</div></div>
+        <div class="kpi"><div class="t">總狩獵經驗加成</div><div class="v" id="sumBuff">0%</div></div>
+        <div class="kpi"><div class="t">苦行實際加成</div><div class="v" id="hardOut">0%</div></div>
+        <div class="kpi"><div class="t">祈禱選用</div><div class="v" id="prayOut">不使用</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>來源拆解</h2>
+      <table>
+        <thead><tr><th>來源</th><th>加成</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+<script>
+function q(id){return document.getElementById(id)}
+function num(v){const n=Number(v); return isFinite(n)?n:0}
+function fmt(n,d=0){return Number(n).toLocaleString('zh-TW',{maximumFractionDigits:d,minimumFractionDigits:d})}
+function godBuff(lv){lv=Math.max(0,Math.min(30,Math.floor(num(lv))));if(lv===0)return 0;if(lv===1)return 10;if(lv>=2&&lv<=9)return 10+(lv-1)*2;if(lv===10)return 37;if(lv>=11&&lv<=19)return 37+(lv-10)*2;if(lv===20)return 67;if(lv>=21&&lv<=29)return 67+(lv-20)*2;if(lv===30)return 100;return 0}
+function calc(){
+  const map = q('map').value==='custom' ? num(q('mapCustom').value) : num(q('map').value);
+  const blue = num(q('blue').value), yellow = num(q('yellow').value), weather = num(q('weather').value);
+  const pray = num(q('pray').value), dice = num(q('dice').value), otherSkill = num(q('otherSkill').value);
+  const union = num(q('union').value), chain = num(q('chain').value), limitBuff = Math.min(10, Math.max(0, num(q('limitBuff').value)));
+  const challenger = num(q('challenger').value), seed = num(q('seed').value), eventBuff = num(q('eventBuff').value);
+  const pet = num(q('pet').value), potion = num(q('potion').value), hardBase = num(q('hard').value);
+  const scrollN = blue===100 ? 2 : blue===200 ? 3 : 4;
+  const hardReal = hardBase===0 ? 0 : 15*scrollN;
+  const god = godBuff(q('godLv').value);
+  q('godOut').value = god + '%';
+  q('prayOut').textContent = q('pray').selectedOptions[0].textContent;
+  q('hardOut').textContent = hardReal + '%';
+  const items = [['基礎',100],['地圖燒',map],['藍捲',blue],['黃水',yellow],['天氣',weather],['祈禱',pray],['骰子6',dice],['其餘職業技能',otherSkill],['精靈傳授+神子角色卡+戰地',union],['精靈鍊',chain],['挑戰者伺服器',challenger],['茁壯幼苗',seed],['苦行',hardReal],['經驗寵物',pet],['經驗秘藥',potion],['極限自填',limitBuff],['活動經驗',eventBuff],['雙面神',god]];
+  const totalRaw = items.reduce((a,b)=>a+b[1],0); const total = totalRaw - 100; const rate = totalRaw/100;
+  q('sumBuff').textContent = fmt(total,2) + '%';
+  q('realRate').textContent = fmt(rate,2) + ' 倍';
+  const tbody=q('tbody'); tbody.innerHTML='';
+  for(const [name,val] of items){const tr=document.createElement('tr');tr.innerHTML='<td>'+name+'</td><td>'+fmt(val,2)+'%</td>';tbody.appendChild(tr)}
+}
+['map','mapCustom','blue','yellow','weather','pray','dice','otherSkill','union','chain','limitBuff','challenger','seed','eventBuff','pet','potion','hard','godLv'].forEach(id=>q(id).addEventListener('input',calc));
+calc();
+</script>
+</body></html>

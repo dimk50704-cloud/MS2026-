@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MS VIP掛機推估</title>
+<style>
+:root{--bg:#0f172a;--card:#111827;--muted:#94a3b8;--text:#e5e7eb;--line:#243041;--accent:#38bdf8}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#0b1220,#0f172a);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans TC",sans-serif}
+.wrap{max-width:1400px;margin:0 auto;padding:24px}
+h1{margin:0 0 8px;font-size:28px}h2{font-size:18px;margin:0 0 12px}h3{font-size:13px;margin:10px 0 6px;color:#94a3b8}
+.sub{color:var(--muted);line-height:1.6;margin-bottom:18px}.nav{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}.nav a{color:#bae6fd;text-decoration:none;background:#082f49;padding:8px 12px;border-radius:999px;border:1px solid #164e63}
+.grid{display:grid;grid-template-columns:1.08fr .92fr;gap:16px;align-items:start}.stack{display:grid;gap:14px}
+.card{background:rgba(17,24,39,.96);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 10px 35px rgba(0,0,0,.22)}
+label{display:block;font-size:13px;color:#cbd5e1;margin-bottom:6px}input,select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #334155;background:#0b1220;color:var(--text)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.muted{color:var(--muted);font-size:12px;line-height:1.5}.section-gap{margin-top:12px;padding-top:12px;border-top:1px dashed #334155}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.kpi{background:#0b1220;border:1px solid #243041;border-radius:10px;padding:8px 10px}.kpi .t{font-size:11px;color:#94a3b8;margin-bottom:4px}.kpi .v{font-size:18px;font-weight:700}
+table{width:100%;border-collapse:collapse}th,td{text-align:right;padding:8px 6px;border-bottom:1px solid #243041;font-size:13px}th:first-child,td:first-child{text-align:left}
+@media(max-width:1100px){.grid{grid-template-columns:1fr}}@media(max-width:760px){.row,.row3,.kpis{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="nav"><a href="./index.html">主計算頁</a><a href="./MS_狩獵經驗％計算.html">狩獵經驗%</a><a href="./MS_狩獵效率.html">狩獵效率</a><a href="./MS_活動資源等值高階EXP.html">活動資源</a><a href="./MS_VIP掛機推估.html">VIP掛機</a></div>
+<h1>MS VIP掛機推估</h1>
+<div class="sub">以每 5 秒 VIP EXP 為基礎，每週掛機推估與等值高階EXP票經驗。</div>
+<div class="grid">
+  <div class="stack">
+    <div class="card">
+      <h2>VIP掛機設定</h2>
+      <div class="row3">
+        <div><label>目前等級</label><select id="level"></select></div>
+        <div><label>目前經驗 %</label><input id="pct" type="number" min="0" max="99.999999" step="0.0001" value="0"></div>
+        <div><label>VIP等級</label><select id="tier"><option value="金">金</option><option value="鑽">鑽</option><option value="皇家">皇家</option></select></div>
+      </div>
+      <div class="row section-gap">
+        <div><label>每週掛機幾小時</label><input id="weeklyHours" type="number" min="0" step="0.5" value="0"></div>
+        <div><label>週六幾小時</label><input id="satHours" type="number" min="0" step="0.5" value="0"></div>
+      </div>
+      <div class="row section-gap">
+        <div class="muted" id="tierInfo"></div>
+        <div class="muted" id="weekInfo"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>目前模型值</h2>
+      <table>
+        <tbody>
+          <tr><th>每5秒 EXP</th><td id="per5s">0</td></tr>
+          <tr><th>每小時 EXP</th><td id="perHour">0</td></tr>
+          <tr><th>目前等級 1高階EXP經驗</th><td id="highBase">0</td></tr>
+          <tr><th>每小時等值高階EXP</th><td id="eqHighHour">0</td></tr>
+          <tr><th>目前等級每小時經驗%</th><td id="pctPerHour">0%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <h2>每週結果</h2>
+      <div class="kpis">
+        <div class="kpi"><div class="t">每週總 EXP（100%）</div><div class="v" id="weekExp100">0</div></div>
+        <div class="kpi"><div class="t">每週總 EXP（90%）</div><div class="v" id="weekExp90">0</div></div>
+        <div class="kpi"><div class="t">每週等值高階EXP（100%）</div><div class="v" id="weekHigh100">0</div></div>
+        <div class="kpi"><div class="t">每週等值高階EXP（90%）</div><div class="v" id="weekHigh90">0</div></div>
+        <div class="kpi"><div class="t">每週等值高階EXP區間</div><div class="v" id="weekHighRange">0</div></div>
+        <div class="kpi"><div class="t">週六加成後有效小時</div><div class="v" id="effectiveHours">0</div></div>
+        <div class="kpi"><div class="t">100% 推估結束</div><div class="v" id="final100">-</div></div>
+        <div class="kpi"><div class="t">90% 推估結束</div><div class="v" id="final90">-</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<script>const VIP={"金": {"260": 8525100, "261": 8525100, "262": 8525100, "263": 8525100, "264": 8525100, "265": 8525100, "266": 8525100, "267": 8525100, "268": 8525100, "269": 8525100, "270": 8525100, "271": 8525100, "272": 8525100, "273": 8525100, "274": 8525100, "275": 8525100, "276": 8525100, "277": 8525100, "278": 8525100, "279": 8525100, "280": 8525100, "281": 8525100, "282": 8525100, "283": 8525100, "284": 8525100, "285": 8525100, "286": 8525100, "287": 8525100, "288": 8525100, "289": 8525100, "290": 8525100, "291": 8525100, "292": 8525100, "293": 8525100, "294": 8525100}, "鑽": {"260": 20801244, "261": 20906154, "262": 21010272, "263": 21114171, "264": 21230073, "265": 22129124, "266": 22235647, "267": 22341642, "268": 22460257, "269": 22565510, "270": 23518210, "271": 23518210, "272": 23518210, "273": 23518210, "274": 23518210, "275": 23518210, "276": 23518210, "277": 23518210, "278": 23518210, "279": 23518210, "280": 23518210, "281": 23518210, "282": 23518210, "283": 23518210, "284": 23518210, "285": 23518210, "286": 23518210, "287": 23518210, "288": 23518210, "289": 23518210, "290": 23518210, "291": 23518210, "292": 23518210, "293": 23518210, "294": 23518210}, "皇家": {"260": 63235782, "261": 63567495, "262": 63896767, "263": 64225414, "264": 64592104, "265": 67439205, "266": 67776851, "267": 68112884, "268": 68489008, "269": 68822824, "270": 71847179, "271": 72028075, "272": 72187987, "273": 72347267, "274": 72525311, "275": 73993095, "276": 74152206, "277": 74330232, "278": 74487542, "279": 74663152, "280": 76163177, "281": 76163177, "282": 76163177, "283": 76163177, "284": 76163177, "285": 76163177, "286": 76163177, "287": 76163177, "288": 76163177, "289": 76163177, "290": 76163177, "291": 76163177, "292": 76163177, "293": 76163177, "294": 76163177}};const HIGH={"260": 388229000, "261": 393816000, "262": 399411000, "263": 405046000, "264": 411393000, "265": 462820000, "266": 469175000, "267": 475554000, "268": 482760000, "269": 489212000, "270": 511726000, "271": 536006000, "272": 542983000, "273": 572884000, "274": 581154000, "275": 653181000, "276": 661414000, "277": 670728000, "278": 679048000, "279": 688437000, "280": 773107000, "281": 783656000, "282": 793073000, "283": 803703000, "284": 813213000, "285": 914168000, "286": 924819000, "287": 936844000, "288": 948944000, "289": 959736000, "290": 1078497000, "291": 1078497000, "292": 1078497000, "293": 1078497000, "294": 1078497000};const REQ={"260": 1731919984062, "261": 1749239183902, "262": 1766731575741, "263": 1784398891498, "264": 1802242880412, "265": 2342915744535, "266": 2366344901980, "267": 2390008350999, "268": 2413908434508, "269": 2438047518853, "270": 5412465491853, "271": 5466590146770, "272": 5521256048237, "273": 5576468608720, "274": 5632233294807, "275": 11377111255510, "276": 12514822381061, "277": 13766304619167, "278": 15142935081084, "279": 16657228589191, "280": 33647601750165, "281": 37012361925183, "282": 40713598117701, "283": 44784957929471, "284": 49263453722418, "285": 99512176519285, "286": 109463394171214, "287": 120409733588335, "288": 132450706947169, "289": 145695777641885, "290": 294305470836608, "291": 323736017920269, "292": 356109619712296, "293": 391720581683526, "294": 430892639851879};
+function fmt(n,d=0){if(!isFinite(n)) return '-';return Number(n).toLocaleString('zh-TW',{maximumFractionDigits:d,minimumFractionDigits:d})}
+function num(v){const n=Number(v);return isFinite(n)?n:0}
+function q(id){return document.getElementById(id)}
+function initLevels(){for(let lv=260;lv<=294;lv++){const op=document.createElement('option');op.value=lv;op.textContent=String(lv);q('level').appendChild(op)}q('level').value=260}
+function simulate(level,pct,tier,effectiveHours,quality){
+  let lv = level;
+  let progress = REQ[lv] * pct / 100;
+  let totalExp = 0;
+  let remainHours = effectiveHours;
+  while(remainHours > 0 && lv <= 294){
+    const perHour = VIP[tier][lv] * 720 * quality;
+    const need = REQ[lv] - progress;
+    const hoursToLevel = perHour > 0 ? (need / perHour) : Infinity;
+    if(remainHours < hoursToLevel || lv === 294){
+      const gain = perHour * remainHours;
+      progress += gain;
+      totalExp += gain;
+      remainHours = 0;
+      if(lv === 294 && progress > REQ[lv]) progress = REQ[lv];
+      break;
+    } else {
+      totalExp += need;
+      remainHours -= hoursToLevel;
+      lv += 1;
+      progress = 0;
+      if(lv > 294) return {level:295,pct:0,totalExp:totalExp};
+    }
+  }
+  const pctOut = lv <= 294 ? (progress / REQ[lv] * 100) : 0;
+  return {level:lv,pct:pctOut,totalExp:totalExp};
+}
+function calc(){
+  const lv = num(q('level').value);
+  const pct = Math.max(0, Math.min(99.999999, num(q('pct').value)));
+  const tier = q('tier').value;
+  const weeklyHours = Math.max(0, num(q('weeklyHours').value));
+  let satHours = Math.max(0, num(q('satHours').value));
+  if(satHours > weeklyHours) satHours = weeklyHours;
+  q('satHours').value = satHours;
+  const per5 = VIP[tier][lv];
+  const perHour = per5 * 720;
+  const high = HIGH[lv];
+  const eqHour = perHour / high;
+  const pctHour = perHour / REQ[lv] * 100;
+  const effectiveHours = (weeklyHours - satHours) + satHours * 2;
+  const sim100 = simulate(lv,pct,tier,effectiveHours,1.0);
+  const sim90 = simulate(lv,pct,tier,effectiveHours,0.9);
+  const weekHigh100 = sim100.totalExp / high;
+  const weekHigh90 = sim90.totalExp / high;
+  q('per5s').textContent = fmt(per5,0);
+  q('perHour').textContent = fmt(perHour,0);
+  q('highBase').textContent = fmt(high,0);
+  q('eqHighHour').textContent = fmt(eqHour,2);
+  q('pctPerHour').textContent = fmt(pctHour,4) + '%';
+  q('weekExp100').textContent = fmt(sim100.totalExp,0);
+  q('weekExp90').textContent = fmt(sim90.totalExp,0);
+  q('weekHigh100').textContent = fmt(weekHigh100,2);
+  q('weekHigh90').textContent = fmt(weekHigh90,2);
+  q('weekHighRange').textContent = fmt(weekHigh90,2) + ' ~ ' + fmt(weekHigh100,2);
+  q('effectiveHours').textContent = fmt(effectiveHours,2) + ' h';
+  q('final100').textContent = sim100.level >= 295 ? 'LV295 已達成' : ('LV' + sim100.level + ' / ' + fmt(sim100.pct,4) + '%');
+  q('final90').textContent = sim90.level >= 295 ? 'LV295 已達成' : ('LV' + sim90.level + ' / ' + fmt(sim90.pct,4) + '%');
+  let info='';
+  if(tier==='金') info='金牌固定不成長';
+  if(tier==='鑽') info='鑽石 270 以上不再成長';
+  if(tier==='皇家') info='皇家 280 以上不再成長';
+  q('tierInfo').textContent = info;
+  q('weekInfo').textContent = '週六掛機時數套用 2 倍經驗；90% ~ 100% 區間已納入伺服器穩定度損失。';
+}
+initLevels();['level','pct','tier','weeklyHours','satHours'].forEach(id => q(id).addEventListener('input', calc));calc();
+</script>
+</body>
+</html>
