@@ -164,7 +164,19 @@ const GENERAL={"260": {"monsterExp": 1725461, "highExp": 388229000, "levelReq": 
 function fmt(n,d=0){if(!isFinite(n)) return '-';return Number(n).toLocaleString('zh-TW',{maximumFractionDigits:d,minimumFractionDigits:d})}
 function num(v){const n=Number(v);return isFinite(n)?n:0}
 function q(id){return document.getElementById(id)}
-function addRow(rows,name,exp,highBase){if(exp>0) rows.push({name,exp,high:highBase>0?exp/highBase:0})}
+function addRow(rows,name,exp,highBase,customHigh=null){
+
+    if(exp<=0) return;
+
+    rows.push({
+        name,
+        exp,
+        high:
+            customHigh !== null
+            ? customHigh
+            : (highBase>0 ? exp/highBase : 0)
+    });
+}
 function zoneBucket(level){return Math.min(290,260+Math.floor((Math.min(level,294)-260)/5)*5)}
 
 function progressAfter(level,pct,extraExp,mode){if(level>=295) return {level:295,pct:0,need:0,status:'LV295 已達成'};let curLevel=level;let pool=GENERAL[curLevel].levelReq*pct/100+extraExp;while(curLevel<=294){const req=GENERAL[curLevel].levelReq;if(pool<req) break;pool-=req;if(mode==='1plus1'&&curLevel<270){curLevel=Math.min(curLevel+2,270);}else{curLevel+=1;}if(curLevel>=295) return {level:295,pct:0,need:0,status:'LV295 已達成'};}const nextReq=GENERAL[curLevel].levelReq;return {level:curLevel,pct:(pool/nextReq)*100,need:Math.max(0,nextReq-pool),status:'可計算'};}
@@ -309,7 +321,8 @@ if(state.waterExpTotal>0){
         rows,
         '各種水',
         state.waterExpTotal,
-        current.highExp
+        current.highExp,
+        state.waterHighTotal
     );
 }
 
