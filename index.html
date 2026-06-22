@@ -176,6 +176,10 @@ function applyWater(state, cap, mode){
     const waterExp =
         GENERAL[grantLevel].levelReq;
 
+    const highEquivalent =
+        waterExp /
+        GENERAL[state.level].highExp;
+
     return {
         state: progressAfter(
             state.level,
@@ -183,7 +187,8 @@ function applyWater(state, cap, mode){
             waterExp,
             mode
         ),
-        exp: waterExp
+        exp: waterExp,
+        highEquivalent
     };
 }
 
@@ -198,7 +203,8 @@ function simulateWaters(state, mode){
 
     waters.sort((a,b)=>a-b);
 
-    let waterExpTotal = 0;
+  let waterExpTotal = 0;
+  let waterHighTotal = 0;
 
     for(const cap of waters){
 
@@ -211,9 +217,11 @@ function simulateWaters(state, mode){
 
         state = result.state;
         waterExpTotal += result.exp;
+waterHighTotal += result.highEquivalent;
     }
 
-    state.waterExpTotal = waterExpTotal;
+   state.waterExpTotal = waterExpTotal;
+state.waterHighTotal = waterHighTotal;
 
     return state;
 }
