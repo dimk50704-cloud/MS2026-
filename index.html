@@ -166,9 +166,58 @@ function num(v){const n=Number(v);return isFinite(n)?n:0}
 function q(id){return document.getElementById(id)}
 function addRow(rows,name,exp,highBase){if(exp>0) rows.push({name,exp,high:highBase>0?exp/highBase:0})}
 function zoneBucket(level){return Math.min(290,260+Math.floor((Math.min(level,294)-260)/5)*5)}
-function waterSimulation(level,pct,mode){let state={level:level,pct:pct,overflowExp:0,grantedExp:0};const defs=[['w249',249],['w259',259],['w269',269],['w274',274]];for(const d of defs){const id=d[0],cap=d[1];let count=Math.max(0,Math.floor(num(q(id).value)));for(let i=0;i<count;i++){if(state.level<=cap){const req=GENERAL[state.level].levelReq;const curExp=req*state.pct/100;const grant=Math.max(0,req-curExp);state.grantedExp+=grant;let nextLevel;if(mode==='1plus1'&&state.level<270){nextLevel=Math.min(state.level+2,270);}else{nextLevel=Math.min(state.level+1,295);}state.level=nextLevel;if(state.level>=295){state.pct=0;continue}const nextReq=GENERAL[state.level].levelReq;state.pct=nextReq>0?(curExp/nextReq)*100:0;}else{const fixedLv=Math.min(Math.max(cap,260),294);const grant=GENERAL[fixedLv].levelReq;state.grantedExp+=grant;state.overflowExp+=grant;}}}return state}
+
 function progressAfter(level,pct,extraExp,mode){if(level>=295) return {level:295,pct:0,need:0,status:'LV295 已達成'};let curLevel=level;let pool=GENERAL[curLevel].levelReq*pct/100+extraExp;while(curLevel<=294){const req=GENERAL[curLevel].levelReq;if(pool<req) break;pool-=req;if(mode==='1plus1'&&curLevel<270){curLevel=Math.min(curLevel+2,270);}else{curLevel+=1;}if(curLevel>=295) return {level:295,pct:0,need:0,status:'LV295 已達成'};}const nextReq=GENERAL[curLevel].levelReq;return {level:curLevel,pct:(pool/nextReq)*100,need:Math.max(0,nextReq-pool),status:'可計算'};}
-function initLevels(){for(let lv=260;lv<=295;lv++){const op=document.createElement('option');op.value=lv;op.textContent=lv===295?'295（已達成）':String(lv);q('level').appendChild(op);}q('level').value=260;}
+function applyWater(state, cap, mode){
+
+    const grantLevel =
+        Math.min(state.level, cap);
+
+    const waterExp =
+        GENERAL[grantLevel].levelReq;
+
+    return {
+        state: progressAfter(
+            state.level,
+            state.pct,
+            waterExp,
+            mode
+        ),
+        exp: waterExp
+    };
+}
+
+function simulateWaters(state, mode){
+
+    const waters = [];
+
+    for(let i=0;i<num(q('w249').value);i++) waters.push(249);
+    for(let i=0;i<num(q('w259').value);i++) waters.push(259);
+    for(let i=0;i<num(q('w269').value);i++) waters.push(269);
+    for(let i=0;i<num(q('w274').value);i++) waters.push(274);
+
+    waters.sort((a,b)=>a-b);
+
+    let waterExpTotal = 0;
+
+    for(const cap of waters){
+
+        const result =
+            applyWater(
+                state,
+                cap,
+                mode
+            );
+
+        state = result.state;
+        waterExpTotal += result.exp;
+    }
+
+    state.waterExpTotal = waterExpTotal;
+
+    return state;
+}
+  function initLevels(){for(let lv=260;lv<=295;lv++){const op=document.createElement('option');op.value=lv;op.textContent=lv===295?'295（已達成）':String(lv);q('level').appendChild(op);}q('level').value=260;}
 function mixedWheelAppliedRate(extraPct){return 120 * 0.3 * (1 + extraPct/100);} 
 function huntRateSimple(){return num(q('baseRate').value) + mixedWheelAppliedRate(num(q('wheelExtra').value));}
 function calc(){
@@ -184,11 +233,16 @@ function calc(){
   q('baseTomato').textContent=fmt((TOMATO[startLevel]||0)*800,0);
   q('parkInfo').textContent='怪公 / 極怪公加成 '+fmt(num(q('extParkBonus').value),2)+'%｜每日260以下 '+fmt(num(q('dailyBonusUnder260').value),2)+'%｜每日260以上 '+fmt(num(q('dailyBonus260Plus').value),2)+'%';
 
-  const water=waterSimulation(startLevel,startPct,q('mode').value);
-  const workLevel=Math.min(water.level,294), workPct=water.pct, work=GENERAL[workLevel], high=work.highExp, bucket=zoneBucket(workLevel);
+  const workLevel = startLevel;
+const workPct = startPct;
+
+const dataLevel = Math.min(workLevel,294);
+
+const work = GENERAL[dataLevel];
+const high = work.highExp;
+const bucket = zoneBucket(dataLevel);
   const rows=[];
-  if(water.grantedExp>0) addRow(rows,'各種水',water.grantedExp,current.highExp);
-  let extraForProgress=water.overflowExp;
+ let extraForProgress = 0;
   function addSource(name, exp){ if(exp>0){ addRow(rows,name,exp,high); extraForProgress+=exp; } }
 
   addSource('高階EXP使用', num(q('manualHighExp').value)*high);
@@ -226,8 +280,32 @@ function calc(){
   * 1.3441
 );
 
-  let total=rows.reduce((a,b)=>a+b.exp,0); if(!isFinite(total)) total=0;
-  const out=progressAfter(workLevel,workPct,extraForProgress,q('mode').value);
+let total=rows.reduce((a,b)=>a+b.exp,0);
+
+let state =
+    progressAfter(
+        startLevel,
+        startPct,
+        extraForProgress,
+        q('mode').value
+    );
+
+state =
+    simulateWaters(
+        state,
+        q('mode').value
+    );
+
+if(state.waterExpTotal>0){
+    addRow(
+        rows,
+        '各種水',
+        state.waterExpTotal,
+        current.highExp
+    );
+}
+
+const out = state;
   q('kpiFinal').textContent=out.level>=295?'LV295 已達成':'LV'+out.level+' / '+fmt(out.pct,4)+'%';
   q('kpiNeed').textContent=out.level>=295?'0':fmt(out.need,0);
   q('kpiStatus').textContent=out.status;
